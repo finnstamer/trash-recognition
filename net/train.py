@@ -1,24 +1,25 @@
 # import matplotlib.pyplot as plt
-from pydoc import classname
+from tracemalloc import take_snapshot
 import numpy as np
-import PIL.Image as Image
+# import PIL.Image as Image
 # import os
 # import tensorflow as tf
 import tensorflow as tf
 from keras import layers
 from keras.utils import conv_utils
 # from tensorflow.keras import layers
-from keras import Model
-
+from keras import Sequential, Model
+from keras.preprocessing.image_dataset import image_dataset_from_directory
+from keras.losses import SparseCategoricalCrossentropy
+keras = tf.keras
 import pathlib
 
 # Constants
 image_height = 384
 image_width = 512
-relativeDataPath = "data"
 
 
-data_dir = pathlib.Path(relativeDataPath)
+data_dir = pathlib.Path("net/data") # Why net/ if this file is already in net???
 normalization_layer = layers.Rescaling(1./255) # Normalizing RGB from 0-255 to 0-1
 
 def getCategoryImages(category: str) -> list:
@@ -29,7 +30,7 @@ def loadDataset(subset: str = "training") -> tf.data.Dataset:
     validationSplit = 0.2 # Proportion of data used for validation
     
 
-    return tf.keras.utils.image_dataset_from_directory(
+    return image_dataset_from_directory(
         data_dir,
         validation_split=validationSplit,
         subset=subset,
@@ -42,7 +43,7 @@ def normalizeDataset(ds: tf.data.Dataset) -> tf.data.Dataset:
     return ds.map(lambda x, y: (normalization_layer(x), y))
 
 def createModel(class_names) -> Model:
-    return Model([
+    return Sequential([
         layers.Rescaling(1./255, input_shape=(image_height, image_width, 3)),
         layers.Conv2D(16, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
@@ -55,16 +56,29 @@ def createModel(class_names) -> Model:
         layers.Dense(len(class_names))
     ])
 
-# def compileModel(model: Model) -> Model:
-#     model.compile(
-#         optimizer="adam",
-#         loss=tf.keras.losses(SparseCategoricalCrossentropy=)
-#     )
+def compileModel(model: Model) -> Model:
+    model.compile(
+        optimizer="adam",
+        loss=SparseCategoricalCrossentropy(from_logits=True),
+        metrics=['accuracy']
+    )
+    return model
 
+def train(model: Model, train_ds: tf.data.Dataset, validation_ds: tf.data.Dataset, epochs: int=10):
+    history = model.fit(
+        train_ds,
+        validation_data=validation_ds,
+        epochs=epochs
+    )
+    return history
 
+# trash = getCategoryImages("*")
+# print(len(trash))
 train_ds = loadDataset()
 val_ds = loadDataset("validation")
 noramlized_train_ds = normalizeDataset(train_ds)
 
 class_names = train_ds.class_names # Namen der Kategorien; korresponideren zu Ordnernamen in data_dir
-model = createModel()
+model = createModel(class_names)
+model = compileModel(model)
+history = train(model, train_ds, val_ds)
