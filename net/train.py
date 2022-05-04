@@ -1,5 +1,10 @@
+import numpy as np
+from typing import Tuple
 import tensorflow as tf
 from pathlib import Path
+from tensorflow.python.ops.nn import softmax
+from keras.preprocessing.image import load_img, img_to_array
+from tensorflow import expand_dims
 from keras import layers
 from keras import Sequential, Model
 from keras.preprocessing.image_dataset import image_dataset_from_directory
@@ -31,22 +36,26 @@ def loadDataset(subset: str = "training") -> tf.data.Dataset:
         batch_size=batchSize
     )
 
-def normalizeDataset(ds: tf.data.Dataset) -> tf.data.Dataset:
-    return ds.map(lambda x, y: (normalization_layer(x), y))
+def augmentation() -> Sequential:
+    return Sequential([
+        layers.RandomFlip("horizontal_and_vertical", input_shape=(image_height, image_width, 3)),
+        layers.RandomRotation(0.1),
+        layers.RandomZoom(0.1),
+    ])
 
 def createModel(class_names) -> Model:
     return Sequential([
+        augmentation(),
         layers.Rescaling(1./255, input_shape=(image_height, image_width, 3)),
         layers.Conv2D(16, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
         layers.Conv2D(32, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
-        layers.Dropout(0.2), # new
         layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
+        layers.Dropout(0.35), # new
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
-        # layers.Dense(48, activation='relu'),
         layers.Dense(len(class_names))
     ])
 
@@ -66,14 +75,31 @@ def train(model: Model, train_ds: tf.data.Dataset, validation_ds: tf.data.Datase
     )
     return history
 
-# trash = getCategoryImages("*")
-# print(len(trash))
+def predict(model: Model, imagePath: str) -> Tuple: # (category: str, confidence: float)
+    img = load_img(imagePath, target_size=(image_height, image_width))
+    imageArray = img_to_array(img)
+    imageArray = expand_dims(imageArray, 0)
+    
+    predictions = model.predict(imageArray)
+    score = softmax(predictions[0])
+    category = class_names[np.argmax(score)]
+    confidence = 100 * np.max(score)
+    return (category, confidence)
+
+
+# Training
+epochs = 20
 train_ds = loadDataset()
 val_ds = loadDataset("validation")
-noramlized_train_ds = normalizeDataset(train_ds)
 
 class_names = train_ds.class_names # Namen der Kategorien; korresponideren zu Ordnernamen in data_dir
 model = createModel(class_names)
 model = compileModel(model)
-history = train(model, train_ds, val_ds)
-visualize(history, 10, "overfitting_64_less units and 0.2dropout")
+history = train(model, train_ds, val_ds, epochs=epochs)
+
+# Predicting
+# path = "net/test/predict-1.jpg"
+# (category, score) = predict(model, path)
+# print(f"Classified image ({path}) to be {category} wih {score} confidence")
+
+visualize(history, epochs, "Data Augmentation (hv-flip; rot0.1, zoo0.1) on 128 units and 0.35 dropout; 12 epochs")

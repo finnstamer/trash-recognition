@@ -1,5 +1,5 @@
-import os
 import matplotlib.pyplot as plt
+from time import strftime
 
 def visualize(history, epochs: int, name: str):
     acc = history.history['accuracy']
@@ -22,5 +22,7 @@ def visualize(history, epochs: int, name: str):
     plt.plot(epochs_range, val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
-    path = f"net/results/{name}.png"
+    timestr = strftime("%Y%m%d-%H%M%S")
+    plt.suptitle(name, fontsize=14)
+    path = f"net/results/{timestr}.png"
     plt.savefig(path)
