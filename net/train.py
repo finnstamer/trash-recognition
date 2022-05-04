@@ -1,25 +1,17 @@
-# import matplotlib.pyplot as plt
-from tracemalloc import take_snapshot
-import numpy as np
-# import PIL.Image as Image
-# import os
-# import tensorflow as tf
 import tensorflow as tf
+from pathlib import Path
 from keras import layers
-from keras.utils import conv_utils
-# from tensorflow.keras import layers
 from keras import Sequential, Model
 from keras.preprocessing.image_dataset import image_dataset_from_directory
 from keras.losses import SparseCategoricalCrossentropy
-keras = tf.keras
-import pathlib
+from visualize import visualize
 
 # Constants
 image_height = 384
 image_width = 512
 
 
-data_dir = pathlib.Path("net/data") # Why net/ if this file is already in net???
+data_dir = Path("net/data") # Why net/ if this file is already in net???
 normalization_layer = layers.Rescaling(1./255) # Normalizing RGB from 0-255 to 0-1
 
 def getCategoryImages(category: str) -> list:
@@ -49,10 +41,12 @@ def createModel(class_names) -> Model:
         layers.MaxPooling2D(),
         layers.Conv2D(32, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
+        layers.Dropout(0.2), # new
         layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
+        # layers.Dense(48, activation='relu'),
         layers.Dense(len(class_names))
     ])
 
@@ -82,3 +76,4 @@ class_names = train_ds.class_names # Namen der Kategorien; korresponideren zu Or
 model = createModel(class_names)
 model = compileModel(model)
 history = train(model, train_ds, val_ds)
+visualize(history, 10, "overfitting_64_less units and 0.2dropout")
