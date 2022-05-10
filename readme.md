@@ -2,8 +2,10 @@
 Trash recognition CNN for classifying trash (currently) based on images from [garythung](https://github.com/garythung/trashnet).
 
 ## Installation
-Install following libraries:
+Required libraries:
 - tensorflow
-- matplotlib (optional for visualization)
+- numpy
+- matplotlib
 
-Then unzip net/data.zip to net/data.
+Unzip net/data.zip and run net/train.py
+

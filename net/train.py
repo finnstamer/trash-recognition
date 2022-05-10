@@ -17,9 +17,7 @@ image_height = 384
 image_width = 512
 
 
-data_dir = Path("net/data") # Why net/ if this file is already in net???
-normalization_layer = layers.Rescaling(1./255) # Normalizing RGB from 0-255 to 0-1
-
+data_dir = Path("data")
 def getCategoryImages(category: str) -> list:
     return list(map(lambda x: str(x), data_dir.glob(f"{category}/*.jpg")))
 
@@ -27,7 +25,6 @@ def loadDataset(subset: str = "training") -> tf.data.Dataset:
     batchSize = 32 # Samples per training
     validationSplit = 0.2 # Proportion of data used for validation
     
-
     return image_dataset_from_directory(
         data_dir,
         validation_split=validationSplit,
@@ -40,8 +37,8 @@ def loadDataset(subset: str = "training") -> tf.data.Dataset:
 def augmentation() -> Sequential:
     return Sequential([
         layers.RandomFlip("horizontal_and_vertical", input_shape=(image_height, image_width, 3)),
-        layers.RandomRotation(0.5),
-        layers.RandomZoom(0.2),
+        layers.RandomRotation(0.4),
+        layers.RandomZoom(0.3),
     ])
 
 def createModel(class_names) -> Model:
@@ -88,10 +85,11 @@ def predict(model: Model, imagePath: str) -> Tuple: # (category: str, confidence
     return (category, confidence)
 
 def saveModel(model: Model, name: str):
-    model.save(f"net/models/{name}")
+    Path("models").mkdir(False, exist_ok=True)
+    model.save(f"models/{name}")
 
 def loadModel(name: str) -> Model:
-    return load_model(f"net/models/{name}")
+    return load_model(f"models/{name}")
 
 def AItrain(epochs=1) -> Tuple:
     train_ds = loadDataset()
@@ -110,8 +108,7 @@ def printPredict(imagePath: str) -> Tuple:
     return (category, score)
 
 
-epochs = 350
+epochs = 1
 (model, history) = AItrain(epochs)
-saveModel(model, "2")
-# printPredict("path")
-visualize(history, epochs, "Data Augmentation (hv-flip; rot0.5, zoo0.2) on 128 units and 0.2 dropout; 350 epochs")
+saveModel(model, "3")
+visualize(history, epochs, "(hv-flip; rot0.4, zoo0.3);128 units;0.2drop")
