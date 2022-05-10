@@ -40,8 +40,8 @@ def loadDataset(subset: str = "training") -> tf.data.Dataset:
 def augmentation() -> Sequential:
     return Sequential([
         layers.RandomFlip("horizontal_and_vertical", input_shape=(image_height, image_width, 3)),
-        layers.RandomRotation(0.3),
-        layers.RandomZoom(0.3),
+        layers.RandomRotation(0.5),
+        layers.RandomZoom(0.2),
     ])
 
 def createModel(class_names) -> Model:
@@ -97,6 +97,7 @@ def AItrain(epochs=1) -> Tuple:
     train_ds = loadDataset()
     val_ds = loadDataset("validation")
 
+    global class_names
     class_names = train_ds.class_names # Namen der Kategorien; korresponideren zu Ordnernamen in data_dir
     model = createModel(class_names)
     model = compileModel(model)
@@ -109,8 +110,8 @@ def printPredict(imagePath: str) -> Tuple:
     return (category, score)
 
 
-epochs = 300
+epochs = 350
 (model, history) = AItrain(epochs)
-# saveModel(model, "2")
+saveModel(model, "2")
 # printPredict("path")
-visualize(history, epochs, "Data Augmentation (hv-flip; rot0.3, zoo0.3) on 128 units and 0.2 dropout; 300 epochs")
+visualize(history, epochs, "Data Augmentation (hv-flip; rot0.5, zoo0.2) on 128 units and 0.2 dropout; 350 epochs")
