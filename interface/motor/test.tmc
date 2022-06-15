@@ -1,0 +1,21 @@
+TEST-CLEAR:
+    GAP 1, 0
+    CALCAV MUL, -1
+    MVPA REL, 0     // MVP by AR
+
+// Clears the motor
+CLEAR:
+    MVP ABS 0
+
+// Handle Action
+HA:
+    WAIT POS, 0, 0  // Wait till Motor reached final position
+    WAIT TICKS, 5000  // Wait till action is fulfilled
+    JA CLEAR
+
+TRASH-1:
+    MVP ABS, 0, 50  // Move Motor
+    JA HA
+
+MainLoop:
+    JA MainLoop
