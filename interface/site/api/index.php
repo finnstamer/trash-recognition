@@ -1,5 +1,7 @@
 <?php
 
+include "../lib/db.php";
+
 function buildResponse(array $array, int $code = 200){
     header("HTTP 1.1 " . $code);
     die(json_encode($array));
@@ -21,7 +23,7 @@ $task = getOrThrow("task");
 if ($task == "new"){
     $classified = getOrThrow("classified");
     $conf = getOrThrow("confidence");
-    $pdo = new PDO("mysql:dbname=id19113998_classification;host=localhost","id19113998_root", 'kP4|Pk$_?Bn5zB]L');
+    $pdo = getPDO(1);
     $statement = $pdo->prepare(
         "INSERT INTO log (image, classified, confidence) VALUES (:image, :classified, :confidence)"
     );

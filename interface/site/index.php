@@ -1,7 +1,8 @@
 <?php
 
-$pdo = new PDO("mysql:dbname=id19113998_classification;host=localhost","id19113998_root", 'kP4|Pk$_?Bn5zB]L');
+include "lib/db.php";
 
+$pdo = getPDO();
 $stm = $pdo->prepare("SELECT * FROM log ORDER BY id DESC LIMIT 1");
 $stm->execute();
 $rows = $stm->fetchAll();
