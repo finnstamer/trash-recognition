@@ -3,7 +3,7 @@
 include "../lib/db.php";
 
 function buildResponse(array $array, int $code = 200){
-    header("HTTP 1.1 " . $code);
+    http_response_code($code);
     die(json_encode($array));
 }
 
@@ -14,8 +14,10 @@ function getOrThrow(string $key) {
     return $_POST[$key];
 }
 
-if (!isset($_POST["pw"]) || $_POST["pw"] != "test"){
-    buildResponse(["msg" => "Required password is incorrect"]);
+$pw = getOrThrow("password");
+
+if ($pw != "test"){
+    buildResponse(["msg" => "Password in invalid"], 403);
 }
 
 $task = getOrThrow("task");
