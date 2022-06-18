@@ -3,7 +3,7 @@ TEST-CLEAR:
     CALCAV MUL, -1
     MVPA REL, 0     // MVP by AR
 
-// Clears the motor
+// 
 CLEAR:
     MVP ABS 0
 

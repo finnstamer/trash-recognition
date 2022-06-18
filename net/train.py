@@ -10,7 +10,7 @@ from tensorflow.python.keras.models import load_model
 from keras import Sequential, Model
 from keras.preprocessing.image_dataset import image_dataset_from_directory
 from keras.losses import SparseCategoricalCrossentropy
-from visualize import visualize
+from visualize import vis_augmentation, visualize
 
 # Constants
 image_height = 384
@@ -47,15 +47,33 @@ def createModel(class_names) -> Model:
         layers.Rescaling(1./255, input_shape=(image_height, image_width, 3)),
         layers.Conv2D(16, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
+        layers.BatchNormalization(),
         layers.Conv2D(32, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
+        layers.BatchNormalization(),
         layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
-        layers.Dropout(0.2),
+        layers.BatchNormalization(),
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
+        layers.Dropout(0.2),
         layers.Dense(len(class_names))
     ])
+# def createModel(class_names) -> Model:
+#     return Sequential([
+#         # augmentation(),
+#         layers.Rescaling(1./255, input_shape=(image_height, image_width, 3)),
+#         layers.Conv2D(16, 3, padding='same', activation='relu'),
+#         layers.MaxPooling2D(),
+#         layers.Conv2D(32, 3, padding='same', activation='relu'),
+#         layers.MaxPooling2D(),
+#         layers.Conv2D(64, 3, padding='same', activation='relu'),
+#         layers.MaxPooling2D(),
+#         # layers.Dropout(0.2),
+#         layers.Flatten(),
+#         layers.Dense(128, activation='relu'),
+#         layers.Dense(len(class_names))
+#     ])
 
 def compileModel(model: Model) -> Model:
     model.compile(
@@ -108,7 +126,8 @@ def printPredict(imagePath: str) -> Tuple:
     return (category, score)
 
 
-epochs = 1
+epochs = 10
 (model, history) = AItrain(epochs)
-saveModel(model, "3")
-visualize(history, epochs, "(hv-flip; rot0.4, zoo0.3);128 units;0.2drop")
+# saveModel(model, "3")
+visualize(history, epochs, "with-data-aug; BatchNormalization")
+
