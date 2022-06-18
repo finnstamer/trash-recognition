@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from time import strftime
+from random import randrange
 
 def visualize(history, epochs: int, name: str):
     acc = history.history['accuracy']
@@ -24,5 +25,21 @@ def visualize(history, epochs: int, name: str):
     plt.title('Training and Validation Loss')
     timestr = strftime("%Y%m%d-%H%M%S")
     plt.suptitle(name, fontsize=14)
-    path = f"net/results/{timestr}.png"
+    path = f"results/{timestr}.png"
     plt.savefig(path)
+
+def vis_augmentation(set, augmentation_func, num, name="test data augmentation"):
+    plt.figure(figsize=(10, 10))
+    aug = augmentation_func()
+    for images, _ in set.shuffle(200).take(1):
+        plt.subplot(3, 3, 1)
+        plt.imshow(images[0].numpy().astype("uint8"))
+        plt.title("Original", fontsize=32)
+        plt.axis("off")
+        for i in range(1, num):
+            plt.subplot(3, 3, i + 1)
+            augmented_images = aug(images)
+            plt.imshow(augmented_images[0].numpy().astype("uint8"))
+            plt.axis("off")
+        path = f"results/data-aug/{name}-{num}.png"
+        plt.savefig(path)

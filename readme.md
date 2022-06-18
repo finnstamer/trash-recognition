@@ -5,7 +5,9 @@ Trash recognition CNN for classifying trash (currently) based on images from [ga
 Required libraries:
 - tensorflow
 - numpy
-- matplotlib
+- matplotlib  (Visualizations)
 
 Unzip net/data.zip and run net/train.py
 
+## Debugging
+Results are stored on http://preclassical-princi.000webhostapp.com/ and can be added on the [](http://preclassical-princi.000webhostapp.com/api).
