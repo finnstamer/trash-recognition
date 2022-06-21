@@ -10,7 +10,8 @@ from tensorflow.python.keras.models import load_model
 from keras import Sequential, Model
 from keras.preprocessing.image_dataset import image_dataset_from_directory
 from keras.losses import SparseCategoricalCrossentropy
-from visualize import vis_augmentation, visualize
+from visualize import vis_augmentation, visualize, visualize_
+from operator import itemgetter
 
 # Constants
 image_height = 384
@@ -37,8 +38,8 @@ def loadDataset(subset: str = "training") -> tf.data.Dataset:
 def augmentation() -> Sequential:
     return Sequential([
         layers.RandomFlip("horizontal_and_vertical", input_shape=(image_height, image_width, 3)),
-        layers.RandomRotation(0.4),
-        layers.RandomZoom(0.3),
+        layers.RandomRotation(1),
+        layers.RandomZoom(0.2),
     ])
 
 def createModel(class_names) -> Model:
@@ -47,33 +48,18 @@ def createModel(class_names) -> Model:
         layers.Rescaling(1./255, input_shape=(image_height, image_width, 3)),
         layers.Conv2D(16, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
-        layers.BatchNormalization(),
         layers.Conv2D(32, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
-        layers.BatchNormalization(),
         layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
-        layers.BatchNormalization(),
+        layers.Conv2D(128, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(128, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
-        layers.Dropout(0.2),
         layers.Dense(len(class_names))
     ])
-# def createModel(class_names) -> Model:
-#     return Sequential([
-#         # augmentation(),
-#         layers.Rescaling(1./255, input_shape=(image_height, image_width, 3)),
-#         layers.Conv2D(16, 3, padding='same', activation='relu'),
-#         layers.MaxPooling2D(),
-#         layers.Conv2D(32, 3, padding='same', activation='relu'),
-#         layers.MaxPooling2D(),
-#         layers.Conv2D(64, 3, padding='same', activation='relu'),
-#         layers.MaxPooling2D(),
-#         # layers.Dropout(0.2),
-#         layers.Flatten(),
-#         layers.Dense(128, activation='relu'),
-#         layers.Dense(len(class_names))
-#     ])
 
 def compileModel(model: Model) -> Model:
     model.compile(
@@ -120,14 +106,46 @@ def AItrain(epochs=1) -> Tuple:
     history = train(model, train_ds, val_ds, epochs=epochs)
     return (model, history)
 
-def printPredict(imagePath: str) -> Tuple:
+def printPredict(model: Model, imagePath: str) -> Tuple:
     (category, score) = predict(model, imagePath)
     print(f"Classified image ({imagePath}) to be '{category}' wih {score}% confidence")
     return (category, score)
 
+def update_key(h1, h2, key):
+    h1[key] += h2.history[key]
+    return h1
 
-epochs = 10
-(model, history) = AItrain(epochs)
+    
+def update_history(globalHistory, history):
+    globalHistory = update_key(globalHistory, history, "accuracy")
+    globalHistory = update_key(globalHistory, history, "val_accuracy")
+    globalHistory = update_key(globalHistory, history, "loss")
+    globalHistory = update_key(globalHistory, history, "val_loss")
+    return globalHistory
+
+
+def trainMultiple(epochs, name):
+    t_ds = loadDataset()
+    v_ds = loadDataset("validation")
+    class_names = t_ds.class_names
+    model = createModel(class_names)
+    model = compileModel(model)
+    trained_epochs = 0
+    # global_history = {"accuracy": [], "val_accuracy": [], "loss": [], "val_loss": []}
+    for _epochs in epochs:
+        print(f"Now training for {_epochs} epochs.")
+        history = train(model, t_ds, v_ds, _epochs)
+        # global_history = update_history(global_history, history)
+        trained_epochs += _epochs
+        saveModel(model, f"{name}_{trained_epochs}")
+        visualize(history, _epochs, f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc__{trained_epochs}", name)
+    # visualize_(**global_history,  epochs=_epochs, name=f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc__{trained_epochs}", dir=name)
+
+trainMultiple([25, 25, 25, 25, 25, 25, 25, 25], "5cv")
+
+
+# epochs = 20
+# (model, history) = AItrain(epochs)
+# visualize(history, epochs, "data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc")
 # saveModel(model, "3")
-visualize(history, epochs, "with-data-aug; BatchNormalization")
-
+# Next more or less cv's

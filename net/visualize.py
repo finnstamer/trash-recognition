@@ -1,20 +1,18 @@
 import matplotlib.pyplot as plt
 from time import strftime
-from random import randrange
+from pathlib import Path
 
-def visualize(history, epochs: int, name: str):
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
+def visualize(history, epochs: int, name: str, dir: str = ""):
+    visualize_(**(history.history), epochs=epochs, name=name, dir=dir)
 
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
+def visualize_(accuracy, val_accuracy, loss, val_loss, epochs: int, name: str, dir: str = ""):
 
     epochs_range = range(epochs)
 
     plt.figure(figsize=(8, 8))
     plt.subplot(1, 2, 1)
-    plt.plot(epochs_range, acc, label='Training Accuracy')
-    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.plot(epochs_range, accuracy, label='Training Accuracy')
+    plt.plot(epochs_range, val_accuracy, label='Validation Accuracy')
     plt.legend(loc='lower right')
     plt.title('Training and Validation Accuracy')
 
@@ -25,7 +23,10 @@ def visualize(history, epochs: int, name: str):
     plt.title('Training and Validation Loss')
     timestr = strftime("%Y%m%d-%H%M%S")
     plt.suptitle(name, fontsize=14)
-    path = f"results/{timestr}.png"
+    if dir != "":
+        Path(f"results/{dir}").mkdir(False, exist_ok=True)
+        dir += "/"
+    path = f"results/{dir}{timestr}.png"
     plt.savefig(path)
 
 def vis_augmentation(set, augmentation_func, num, name="test data augmentation"):
