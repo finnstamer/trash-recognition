@@ -10,4 +10,4 @@ Required libraries:
 Unzip net/data.zip and run net/train.py
 
 ## Debugging
-Results are stored on http://preclassical-princi.000webhostapp.com/ and can be added on the [](http://preclassical-princi.000webhostapp.com/api).
+Results are stored on http://preclassical-princi.000webhostapp.com/ and can be added on this [API-Endpoint (/api)](http://preclassical-princi.000webhostapp.com/api).
