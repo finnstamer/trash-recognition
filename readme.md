@@ -1,5 +1,5 @@
 # Trash Recognition
-Trash recognition CNN for classifying trash (currently) based on images from [garythung](https://github.com/garythung/trashnet).
+Trash recognition CNN for classifying trash (currently) based on images from [garythung](https://github.com/garythung/trashnet) and [sapal6](https://www.kaggle.com/datasets/sapal6/waste-classification-data-v2?resource=download)(CC BY-SA 4.0 License).
 
 ## Installation
 Required libraries:
