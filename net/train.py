@@ -11,7 +11,6 @@ from keras import Sequential, Model
 from keras.preprocessing.image_dataset import image_dataset_from_directory
 from keras.losses import SparseCategoricalCrossentropy
 from visualize import vis_augmentation, visualize, visualize_
-from operator import itemgetter
 
 # Constants
 image_height = 384
@@ -108,20 +107,8 @@ def AItrain(epochs=1) -> Tuple:
 
 def printPredict(model: Model, imagePath: str) -> Tuple:
     (category, score) = predict(model, imagePath)
-    print(f"Classified image ({imagePath}) to be '{category}' wih {score}% confidence")
+    print(f"Classified image ({imagePath}) to be '{category}' with conf: {score}")
     return (category, score)
-
-def update_key(h1, h2, key):
-    h1[key] += h2.history[key]
-    return h1
-
-    
-def update_history(globalHistory, history):
-    globalHistory = update_key(globalHistory, history, "accuracy")
-    globalHistory = update_key(globalHistory, history, "val_accuracy")
-    globalHistory = update_key(globalHistory, history, "loss")
-    globalHistory = update_key(globalHistory, history, "val_loss")
-    return globalHistory
 
 
 def trainMultiple(epochs, name):
@@ -131,17 +118,15 @@ def trainMultiple(epochs, name):
     model = createModel(class_names)
     model = compileModel(model)
     trained_epochs = 0
-    # global_history = {"accuracy": [], "val_accuracy": [], "loss": [], "val_loss": []}
     for _epochs in epochs:
         print(f"Now training for {_epochs} epochs.")
         history = train(model, t_ds, v_ds, _epochs)
-        # global_history = update_history(global_history, history)
         trained_epochs += _epochs
         saveModel(model, f"{name}_{trained_epochs}")
-        visualize(history, _epochs, f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc__{trained_epochs}", name)
-    # visualize_(**global_history,  epochs=_epochs, name=f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc__{trained_epochs}", dir=name)
+        visualize(history, _epochs, f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc [{trained_epochs - _epochs}-{trained_epochs}]", name)
 
-trainMultiple([25, 25, 25, 25, 25, 25, 25, 25], "5cv")
+trainMultiple([2, 3], "test")
+# trainMultiple([25, 25, 25, 25, 25, 25, 25, 25], "5cv")
 
 
 # epochs = 20
@@ -149,3 +134,12 @@ trainMultiple([25, 25, 25, 25, 25, 25, 25, 25], "5cv")
 # visualize(history, epochs, "data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc")
 # saveModel(model, "3")
 # Next more or less cv's
+
+
+# train_ds = loadDataset()
+# global class_names
+# class_names = train_ds.class_names
+# model = loadModel("modelc5/5cv_200")
+# printPredict(model, "data/test3.jpg")
+
+

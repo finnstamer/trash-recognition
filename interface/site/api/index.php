@@ -25,12 +25,11 @@ $task = getOrThrow("task");
 if ($task == "new"){
     $classified = getOrThrow("classified");
     $conf = getOrThrow("confidence");
-    $pdo = getPDO(1);
+    $pdo = getPDO();
     $statement = $pdo->prepare(
         "INSERT INTO log (image, classified, confidence) VALUES (:image, :classified, :confidence)"
     );
     $statement->execute(["image" => "", "classified" => $classified, "confidence" => $conf]);
-    
 }
 
 
