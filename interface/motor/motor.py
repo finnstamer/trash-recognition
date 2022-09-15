@@ -1,5 +1,6 @@
+from symbol import factor
 from tkinter import MOVETO
-from pyautogui import moveTo, leftClick, position, typewrite, press
+from pyautogui import moveTo, leftClick, position, typewrite, press, keyDown
 from time import sleep
 
 STOP = {
@@ -16,15 +17,23 @@ REL = {
     "2": (1280, 520)
 }
 
-def backspace():
-    press("BACKSPACE", 20)
+EMERGENCY_STOP = (44, 128)
+
+def printCursorPos():
+    while True:
+        print(position())
+def backspace(times=1):
+    press("BACKSPACE", times)
+
+def setText(text: str, maxContentLen=20):
+    backspace(maxContentLen)
+    typewrite(text)
 
 def setPos(motor: str, value: int):
     moveTo(TARGET_POS[motor])
     leftClick()
     backspace()
-    print(str(value))
-    typewrite(str(value))
+    setText(str(value))
 
 def start(motor: str):
     moveTo(REL[motor])
@@ -34,14 +43,22 @@ def stop(motor: str):
     moveTo(STOP[motor])
     leftClick()
 
-_360 = 52_000.00
+def emergencyStop():
+    moveTo(EMERGENCY_STOP)
+    leftClick()
+
+_360 = 52_000
+def getRotationValue(factorOfFullRot: float) -> int:
+    return int(factorOfFullRot * _360)
+
 def left():
-    ROTATE = 1.00/4.00 * _360
-    print(1/4, 1/4 * _360)
+    ROTATE = getRotationValue(1/4)
     setPos("1", ROTATE)
     start("1")
+
     sleep(2)
     setPos("1", - ROTATE)
+    sleep(2)
 
 
 def middle():
@@ -58,8 +75,5 @@ def middle():
 def right():
     pass
 
-# sleep(2)
-# setPos("1", 10_000)
-# start("1")
-# # start("2")
+sleep(2)
 left()
