@@ -122,7 +122,7 @@ def trainMultiple(epochs, name):
         history = train(model, t_ds, v_ds, _epochs)
         trained_epochs += _epochs
         saveModel(model, f"{name}_{trained_epochs}")
-        visualize(history, _epochs, f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc [{trained_epochs - _epochs}-{trained_epochs}]", name)
+        # visualize(history, _epochs, f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc [{trained_epochs - _epochs}-{trained_epochs}]", name)
 
 # trainMultiple([2, 3], "test")
 # trainMultiple([25, 25, 25, 25, 25, 25, 25, 25], "5cv")
@@ -143,3 +143,5 @@ def printPredict2(model: str, file: str):
         print(f"Nicht erkannt. ({category}:{score})")
     else:
         print(f"{category}:{score}%")
+    
+    return (category, score)
