@@ -1,9 +1,17 @@
 from typing import Tuple
 from pygame import camera, image
-def savePicture(cam: str, dimensions: Tuple, saveFile: str) -> None:
+from time import sleep
+
+def getCamera(cam: str, size: Tuple):
     camera.init()
-    print(camera.list_cameras())
-    cam = camera.Camera(cam, dimensions)
+    cam = camera.Camera(cam, size)
     cam.start()
-    img = cam.get_image()
-    image.save(img, saveFile)
+    sleep(1)
+    return cam
+    
+def savePicture(cam: str, size: Tuple, saveFile: str) -> None:
+    img = getCamera(cam, size).get_image()
+    image.save(img, saveFile, "jpg")
+
+# savePicture("FHD Webcam", (384, 512), "../../test.bmp")
+# newItem("FHD Webcam", (512, 384))

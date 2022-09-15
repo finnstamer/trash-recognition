@@ -10,14 +10,13 @@ from tensorflow.python.keras.models import load_model
 from keras import Sequential, Model
 from keras.preprocessing.image_dataset import image_dataset_from_directory
 from keras.losses import SparseCategoricalCrossentropy
-from visualize import vis_augmentation, visualize, visualize_
-
+# from visualize import vis_augmentation, visualize, visualize_
 # Constants
 image_height = 384
 image_width = 512
 
 
-data_dir = Path("data")
+data_dir = Path("net/data")
 def getCategoryImages(category: str) -> list:
     return list(map(lambda x: str(x), data_dir.glob(f"{category}/*.jpg")))
 
@@ -92,7 +91,7 @@ def saveModel(model: Model, name: str):
     model.save(f"models/{name}")
 
 def loadModel(name: str) -> Model:
-    return load_model(f"models/{name}")
+    return load_model(f"net/models/{name}")
 
 def AItrain(epochs=1) -> Tuple:
     train_ds = loadDataset()
@@ -125,7 +124,7 @@ def trainMultiple(epochs, name):
         saveModel(model, f"{name}_{trained_epochs}")
         visualize(history, _epochs, f"data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc [{trained_epochs - _epochs}-{trained_epochs}]", name)
 
-trainMultiple([2, 3], "test")
+# trainMultiple([2, 3], "test")
 # trainMultiple([25, 25, 25, 25, 25, 25, 25, 25], "5cv")
 
 
@@ -134,12 +133,13 @@ trainMultiple([2, 3], "test")
 # visualize(history, epochs, "data-Aug (r:1, z=0.2, f=hv); 5cv(16*x) 128fc")
 # saveModel(model, "3")
 # Next more or less cv's
-
-
-# train_ds = loadDataset()
-# global class_names
-# class_names = train_ds.class_names
-# model = loadModel("modelc5/5cv_200")
-# printPredict(model, "data/test3.jpg")
-
-
+def printPredict2(model: str, file: str):
+    train_ds = loadDataset()
+    global class_names
+    class_names = train_ds.class_names
+    model = loadModel(model) # modelc5/5cv_200
+    (category, score) = predict(model, file)
+    if score < 98:
+        print(f"Nicht erkannt. ({category}:{score})")
+    else:
+        print(f"{category}:{score}%")
