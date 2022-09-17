@@ -51,29 +51,54 @@ _360 = 52_000
 def getRotationValue(factorOfFullRot: float) -> int:
     return int(factorOfFullRot * _360)
 
-def left():
-    ROTATE = getRotationValue(1/4)
-    setPos("1", ROTATE)
+def firstLeft():
+    setPos("1", -2200)
     start("1")
 
     sleep(2)
-    setPos("1", - ROTATE)
+
+    setPos("1", 2200)
+    start("1")
+    sleep(2)
+
+def firstRight():
+    setPos("1", 600)
+    start("1")
+    sleep(2)
+    setPos("1", -500)
+    start("1")
+    sleep(2)
+
+def secondRight():
+    setPos("2", -900)
+    start("2")
+    sleep(2)
+    setPos("2", 1100)
+    start("2")
     sleep(2)
 
 
-def middle():
-    ROTATE = 3/4 * _360
-    setPos("1", ROTATE)
-    # start("1")
-    # sleep(2)
-    # setPos("1", - ROTATE)
+def secondLeft():
+    setPos("2", 800)
+    start("2")
+    sleep(2)
+    setPos("2", -1000)
+    start("2")
+    sleep(2)
 
+def left():
+    firstLeft()
 
 def middle():
-    pass
+    firstRight()
+    secondLeft()
 
 def right():
-    pass
+    firstRight()
+    secondRight()
 
-sleep(2)
-left()
+if __name__ == '__main__':
+    # right()
+    middle()
+# sleep(2)
+# left()
